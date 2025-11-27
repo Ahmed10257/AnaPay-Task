@@ -122,7 +122,6 @@ class _RegisterPageState extends State<RegisterPage>
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'email': user.email,
           'uid': user.uid,
-          'name': user.displayName ?? '',
           'fcmToken': token ?? 'no-token',
           'createdAt': FieldValue.serverTimestamp(),
         });
@@ -177,7 +176,70 @@ class _RegisterPageState extends State<RegisterPage>
         idToken: googleAuth.idToken,
       );
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      UserCredential credential_result =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      User user = credential_result.user!;
+      print('✅ User signed in: ${user.uid}');
+
+      // Get FCM token
+      String? token;
+      try {
+        print('Requesting FCM permission...');
+
+        // Request notification permission
+        NotificationSettings settings = await FirebaseMessaging.instance
+            .requestPermission(
+              alert: true,
+              announcement: false,
+              badge: true,
+              criticalAlert: false,
+              provisional: false,
+              sound: true,
+            )
+            .timeout(
+              const Duration(seconds: 5),
+              onTimeout: () {
+                print('⚠️ FCM permission request timed out');
+                throw Exception('Permission request timeout');
+              },
+            );
+
+        print('User granted permission: ${settings.authorizationStatus}');
+
+        // Get the token
+        if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+          token = await FirebaseMessaging.instance
+              .getToken(
+                vapidKey:
+                    'BMp0hJzR817YbVQH3F7vggxfMDmGxGN15Gd0TlVtKgT7CrXnuldBrMyhOKHisxU7wCixhNVkEFMhKYHoXpoT_Wo',
+              )
+              .timeout(
+                const Duration(seconds: 5),
+                onTimeout: () {
+                  print('⚠️ FCM token request timed out');
+                  return null;
+                },
+              );
+          if (token != null) {
+            print('✅ FCM Token obtained: $token');
+          }
+        } else {
+          print('User denied notification permission');
+        }
+      } catch (e) {
+        print('⚠️ Error getting FCM token: $e');
+        // Continue even if FCM fails
+      }
+
+      // Save user to Firestore with token
+      print('💾 Saving user to Firestore...');
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'email': user.email,
+        'uid': user.uid,
+        'fcmToken': token ?? 'no-token',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      print('✅ User saved to Firestore');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
