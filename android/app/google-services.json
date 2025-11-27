@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "543139785376",
+    "project_id": "anapay-task",
+    "storage_bucket": "anapay-task.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:543139785376:android:8a931b9b5c5580b9d9f7c5",
+        "android_client_info": {
+          "package_name": "com.example.anapay_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "543139785376-vc6n6fpjcsnktjv9h0d826sohqsveb1v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_mvW2ixlPJMaMpzfAonjT1QFulNQShvk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "543139785376-vc6n6fpjcsnktjv9h0d826sohqsveb1v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
