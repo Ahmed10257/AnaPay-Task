@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:js' as js;
+import 'dart:html' as html;
 import 'login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -164,6 +166,45 @@ class _RegisterPageState extends State<RegisterPage>
   }
 
   Future<void> _handleGoogleSignIn() async {
+    if (kIsWeb) {
+      // For web: Use Google Identity Services
+      await _handleGoogleSignInWeb();
+    } else {
+      // For mobile: Use traditional signIn
+      await _handleGoogleSignInMobile();
+    }
+  }
+
+  Future<void> _handleGoogleSignInWeb() async {
+    setState(() => _isGoogleLoading = true);
+    try {
+      // Trigger Google Sign-In popup
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        setState(() => _isGoogleLoading = false);
+        return;
+      }
+
+      await _processGoogleSignIn(googleUser);
+    } catch (error) {
+      print('❌ Google web sign-in error: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google sign-up failed: $error'),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignInMobile() async {
     setState(() => _isGoogleLoading = true);
     try {
       // Check if user is already signed in
@@ -178,6 +219,27 @@ class _RegisterPageState extends State<RegisterPage>
         return;
       }
 
+      await _processGoogleSignIn(googleUser);
+    } catch (error) {
+      print('❌ Google mobile sign-in error: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google sign-up failed: $error'),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
+    }
+  }
+
+  Future<void> _processGoogleSignIn(GoogleSignInAccount googleUser) async {
+    try {
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
@@ -266,20 +328,17 @@ class _RegisterPageState extends State<RegisterPage>
         );
       }
     } catch (error) {
-      print('❌ Google sign-in error: $error');
+      print('❌ Google sign-in processing error: $error');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Google sign-up failed: $error'),
+            content: Text('Failed to process sign-in: $error'),
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isGoogleLoading = false);
-      }
+      rethrow;
     }
   }
 
