@@ -4,16 +4,6 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
-/// Default [FirebaseOptions] for use with your Firebase apps.
-///
-/// Example:
-/// ```dart
-/// import 'firebase_options.dart';
-/// // ...
-/// await Firebase.initializeApp(
-///   options: DefaultFirebaseOptions.currentPlatform,
-/// );
-/// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -67,7 +57,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '543139785376',
     projectId: 'anapay-task',
     storageBucket: 'anapay-task.firebasestorage.app',
-    iosClientId: '543139785376-9gj1nnrahi6994khtguk7crbp46k1gfr.apps.googleusercontent.com',
+    iosClientId:
+        '543139785376-9gj1nnrahi6994khtguk7crbp46k1gfr.apps.googleusercontent.com',
     iosBundleId: 'com.example.anapayApp',
   );
 

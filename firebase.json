@@ -1,1 +1,38 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"anapay-task","appId":"1:543139785376:android:8a931b9b5c5580b9d9f7c5","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"anapay-task","configurations":{"android":"1:543139785376:android:8a931b9b5c5580b9d9f7c5","ios":"1:543139785376:ios:057221d256272138d9f7c5","web":"1:543139785376:web:d3e912d4896bf0ebd9f7c5","windows":"1:543139785376:web:35f16f554eb566e2d9f7c5"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "anapay-task",
+          "appId": "1:543139785376:android:8a931b9b5c5580b9d9f7c5",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "anapay-task",
+          "configurations": {
+            "android": "1:543139785376:android:8a931b9b5c5580b9d9f7c5",
+            "ios": "1:543139785376:ios:057221d256272138d9f7c5",
+            "web": "1:543139785376:web:d3e912d4896bf0ebd9f7c5",
+            "windows": "1:543139785376:web:35f16f554eb566e2d9f7c5"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

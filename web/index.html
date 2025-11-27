@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <!--
+  <head>
+    <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
 
@@ -14,27 +14,60 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="$FLUTTER_BASE_HREF">
+    <base href="$FLUTTER_BASE_HREF" />
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-  <meta name="google-signin-client_id" content="543139785376-vc6n6fpjcsnktjv9h0d826sohqsveb1v.apps.googleusercontent.com" />
+    <meta charset="UTF-8" />
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+    <meta name="description" content="A new Flutter project." />
+    <meta
+      name="google-signin-client_id"
+      content="543139785376-vc6n6fpjcsnktjv9h0d826sohqsveb1v.apps.googleusercontent.com"
+    />
 
+    <!-- iOS meta tags & icons -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="AnaPay App" />
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="AnaPay App">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png" />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+    <title>AnaPay App</title>
+    <link rel="manifest" href="manifest.json" />
 
-  <title>AnaPay App</title>
-  <link rel="manifest" href="manifest.json">
-</head>
-<body>
-  <script src="flutter_bootstrap.js" async></script>
-</body>
+    <script type="module">
+      // Initialize Firebase SDKs
+      if (!window.flutterFirebaseApp) {
+        import("https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js")
+          .then(({ initializeApp }) => {
+            // Firebase will be initialized by Flutter
+            console.log("Firebase SDKs loaded");
+          })
+          .catch((err) => console.log("Firebase script load error:", err));
+      }
+    </script>
+  </head>
+  <body>
+    <!-- Register Service Worker for Firebase Messaging -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("/firebase-messaging-sw.js", {
+              scope: "/firebase-cloud-messaging-push-scope",
+            })
+            .then((registration) => {
+              console.log("Service Worker registered successfully");
+              // Notify that service worker is ready
+              window.serviceWorkerReady = true;
+            })
+            .catch((err) => {
+              console.log("Service Worker registration failed:", err);
+            });
+        });
+      }
+    </script>
+    <script src="flutter_bootstrap.js" async></script>
+  </body>
 </html>

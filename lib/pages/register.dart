@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -23,6 +25,8 @@ class _RegisterPageState extends State<RegisterPage>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final fcm = FirebaseMessaging.instance;
+  final firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -54,10 +58,74 @@ class _RegisterPageState extends State<RegisterPage>
           throw Exception('Passwords do not match');
         }
 
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
+        UserCredential credential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+              email: _emailController.text.trim(),
+              password: _passwordController.text.trim(),
+            );
+
+        User user = credential.user!;
+        print('✅ User created: ${user.uid}');
+
+        // Get FCM token
+        String? token;
+        try {
+          print('Requesting FCM permission...');
+
+          // Request notification permission
+          NotificationSettings settings = await FirebaseMessaging.instance
+              .requestPermission(
+                alert: true,
+                announcement: false,
+                badge: true,
+                criticalAlert: false,
+                provisional: false,
+                sound: true,
+              )
+              .timeout(
+                const Duration(seconds: 5),
+                onTimeout: () {
+                  print('⚠️ FCM permission request timed out');
+                  throw Exception('Permission request timeout');
+                },
+              );
+
+          print('User granted permission: ${settings.authorizationStatus}');
+
+          // Get the token
+          if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+            token = await FirebaseMessaging.instance
+                .getToken(
+                  vapidKey:
+                      'BMp0hJzR817YbVQH3F7vggxfMDmGxGN15Gd0TlVtKgT7CrXnuldBrMyhOKHisxU7wCixhNVkEFMhKYHoXpoT_Wo',
+                )
+                .timeout(
+                  const Duration(seconds: 5),
+                  onTimeout: () {
+                    print('⚠️ FCM token request timed out');
+                    return null;
+                  },
+                );
+            if (token != null) {
+              print('✅ FCM Token obtained: $token');
+            }
+          } else {
+            print('User denied notification permission');
+          }
+        } catch (e) {
+          print('⚠️ Error getting FCM token: $e');
+          // Continue even if FCM fails
+        }
+
+        // Save user to Firestore with token
+        print('💾 Saving user to Firestore...');
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'email': user.email,
+          'uid': user.uid,
+          'fcmToken': token ?? 'no-token',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        print('✅ User saved to Firestore');
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -74,6 +142,7 @@ class _RegisterPageState extends State<RegisterPage>
           );
         }
       } catch (error) {
+        print('❌ Registration error: $error');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -138,6 +207,19 @@ class _RegisterPageState extends State<RegisterPage>
         setState(() => _isGoogleLoading = false);
       }
     }
+  }
+
+  Future<String?> getDeviceToken() async {
+    return await fcm.getToken();
+  }
+
+  Future<void> saveUserData(User user, String? token) async {
+    await firestore.collection('users').doc(user.uid).set({
+      'email': user.email,
+      'uid': user.uid,
+      'token': token,
+      'createdAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true)); // future login will just update the token
   }
 
   @override
