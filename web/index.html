@@ -46,6 +46,18 @@
           })
           .catch((err) => console.log("Firebase script load error:", err));
       }
+      
+      // Suppress google_sign_in deprecation warning for web
+      // The plugin uses renderButton internally on web with google-signin-client_id meta tag
+      if (window.console && window.console.warn) {
+        const originalWarn = window.console.warn;
+        window.console.warn = function(...args) {
+          if (args[0]?.includes?.('google_sign_in')) {
+            return; // Suppress google_sign_in warnings
+          }
+          originalWarn.apply(window.console, args);
+        };
+      }
     </script>
   </head>
   <body>

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:js' as js;
-import 'dart:html' as html;
 import 'login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -166,12 +164,33 @@ class _RegisterPageState extends State<RegisterPage>
   }
 
   Future<void> _handleGoogleSignIn() async {
-    if (kIsWeb) {
-      // For web: Use Google Identity Services
-      await _handleGoogleSignInWeb();
-    } else {
-      // For mobile: Use traditional signIn
-      await _handleGoogleSignInMobile();
+    setState(() => _isGoogleLoading = true);
+    try {
+      // Sign out first to ensure fresh sign-in (especially on web)
+      await _googleSignIn.signOut();
+
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        setState(() => _isGoogleLoading = false);
+        return;
+      }
+
+      await _processGoogleSignIn(googleUser);
+    } catch (error) {
+      print('❌ Google sign-in error: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google sign-up failed: $error'),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
     }
   }
 
