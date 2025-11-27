@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'register.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -121,6 +123,33 @@ class _LoginPageState extends State<LoginPage>
       }
     }
   }
+Future<bool> login() async {
+  try {
+    // 1. Trigger Google Sign-In UI
+    final GoogleSignInAccount? user = await GoogleSignIn().signIn();
+
+    if (user == null) {
+      return false; // user canceled login
+    }
+
+    // 2. Extract authentication tokens
+    final GoogleSignInAuthentication userAuth = await user.authentication;
+
+    // 3. Create Firebase credential
+    final credential = GoogleAuthProvider.credential(
+      idToken: userAuth.idToken,
+      accessToken: userAuth.accessToken,
+    );
+
+    // 4. Sign in to Firebase
+    await FirebaseAuth.instance.signInWithCredential(credential);
+
+    return FirebaseAuth.instance.currentUser != null;
+  } catch (e) {
+    print("Google login error: $e");
+    return false;
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -431,9 +460,13 @@ class _LoginPageState extends State<LoginPage>
                       width: double.infinity,
                       height: 54,
                       child: OutlinedButton(
-                        onPressed: _isGoogleLoading
-                            ? null
-                            : _handleGoogleSignIn,
+                        onPressed: () async  {
+                          bool islogged = await login();
+
+                          if (islogged){
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> HomePage()));
+                          }
+                        },
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(
                             color: isDark

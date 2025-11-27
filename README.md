@@ -1,4 +1,4 @@
-# anapay_app
+# Anapay App
 
 A new Flutter project.
 
