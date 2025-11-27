@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -24,7 +25,9 @@ class _RegisterPageState extends State<RegisterPage>
   bool _isGoogleLoading = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+  );
   final fcm = FirebaseMessaging.instance;
   final firestore = FirebaseFirestore.instance;
 
@@ -163,6 +166,12 @@ class _RegisterPageState extends State<RegisterPage>
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isGoogleLoading = true);
     try {
+      // Check if user is already signed in
+      bool isSignedIn = await _googleSignIn.isSignedIn();
+      if (isSignedIn) {
+        await _googleSignIn.disconnect();
+      }
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         setState(() => _isGoogleLoading = false);
@@ -236,9 +245,10 @@ class _RegisterPageState extends State<RegisterPage>
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'email': user.email,
         'uid': user.uid,
+        'displayName': user.displayName,
         'fcmToken': token ?? 'no-token',
         'createdAt': FieldValue.serverTimestamp(),
-      });
+      }, SetOptions(merge: true));
       print('✅ User saved to Firestore');
 
       if (mounted) {
@@ -256,6 +266,7 @@ class _RegisterPageState extends State<RegisterPage>
         );
       }
     } catch (error) {
+      print('❌ Google sign-in error: $error');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
