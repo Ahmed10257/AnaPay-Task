@@ -1,0 +1,119 @@
+/// Firestore User Data Source
+/// Handles all Firestore operations for user data
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:anapay_app/core/error/exceptions.dart';
+import 'package:anapay_app/core/util/logger.dart';
+import '../models/user_model.dart';
+
+abstract class FirestoreUserDataSource {
+  /// Save user data to Firestore
+  Future<void> saveUserData(UserModel user);
+
+  /// Get user data from Firestore
+  Future<UserModel?> getUserData(String uid);
+
+  /// Update user data in Firestore
+  Future<void> updateUserData(String uid, Map<String, dynamic> data);
+
+  /// Delete user data from Firestore
+  Future<void> deleteUserData(String uid);
+}
+
+class FirestoreUserDataSourceImpl implements FirestoreUserDataSource {
+  static const String _usersCollection = 'users';
+
+  final FirebaseFirestore _firestore;
+
+  FirestoreUserDataSourceImpl({required FirebaseFirestore firestore})
+      : _firestore = firestore;
+
+  @override
+  Future<void> saveUserData(UserModel user) async {
+    try {
+      AppLogger.info('Saving user data for UID: ${user.uid}');
+
+      await _firestore
+          .collection(_usersCollection)
+          .doc(user.uid)
+          .set(
+            user.toFirestoreJson(),
+            SetOptions(merge: true),
+          );
+
+      AppLogger.success('User data saved for UID: ${user.uid}');
+    } catch (e) {
+      AppLogger.error('Error saving user data', e);
+      throw AppFirebaseException(
+        message: 'Failed to save user data: $e',
+        originalException: e,
+      );
+    }
+  }
+
+  @override
+  Future<UserModel?> getUserData(String uid) async {
+    try {
+      AppLogger.debug('Fetching user data for UID: $uid');
+
+      final doc = await _firestore
+          .collection(_usersCollection)
+          .doc(uid)
+          .get();
+
+      if (doc.exists && doc.data() != null) {
+        AppLogger.success('User data retrieved for UID: $uid');
+        return UserModel.fromFirestoreJson(doc.data()!);
+      }
+
+      AppLogger.warning('No user data found for UID: $uid');
+      return null;
+    } catch (e) {
+      AppLogger.error('Error fetching user data', e);
+      throw AppFirebaseException(
+        message: 'Failed to fetch user data: $e',
+        originalException: e,
+      );
+    }
+  }
+
+  @override
+  Future<void> updateUserData(String uid, Map<String, dynamic> data) async {
+    try {
+      AppLogger.info('Updating user data for UID: $uid');
+
+      await _firestore
+          .collection(_usersCollection)
+          .doc(uid)
+          .update(data);
+
+      AppLogger.success('User data updated for UID: $uid');
+    } catch (e) {
+      AppLogger.error('Error updating user data', e);
+      throw AppFirebaseException(
+        message: 'Failed to update user data: $e',
+        originalException: e,
+      );
+    }
+  }
+
+  @override
+  Future<void> deleteUserData(String uid) async {
+    try {
+      AppLogger.info('Deleting user data for UID: $uid');
+
+      await _firestore
+          .collection(_usersCollection)
+          .doc(uid)
+          .delete();
+
+      AppLogger.success('User data deleted for UID: $uid');
+    } catch (e) {
+      AppLogger.error('Error deleting user data', e);
+      throw AppFirebaseException(
+        message: 'Failed to delete user data: $e',
+        originalException: e,
+      );
+    }
+  }
+}
