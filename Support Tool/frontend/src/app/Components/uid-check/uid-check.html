@@ -1,0 +1,8 @@
+<div>
+  <input [(ngModel)]="uid" placeholder="Enter user UID" />
+  <button (click)="checkUser()">Check Firestore</button>
+  <button (click)="sendNotification()">Send Notification</button>
+
+  <div *ngIf="message">{{message}}</div>
+  <pre *ngIf="userJson">{{ userJson | json }}</pre>
+</div>
