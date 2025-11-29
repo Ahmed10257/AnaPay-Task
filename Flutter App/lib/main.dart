@@ -4,6 +4,7 @@ import 'package:device_preview/device_preview.dart';
 import 'firebase_options.dart';
 import 'core/service_locator.dart';
 import 'core/util/logger.dart';
+import 'core/services/firebase_messaging_service.dart';
 import 'config/theme/app_theme.dart';
 import 'config/routes/app_routes.dart';
 import 'features/authentication/presentation/pages/register_page.dart';
@@ -20,6 +21,11 @@ void main() async {
     );
     AppLogger.success('Firebase initialized successfully');
 
+    // Initialize Firebase Messaging
+    final messagingService = FirebaseMessagingService();
+    await messagingService.requestPermission();
+    AppLogger.success('Firebase Messaging initialized');
+
     // Initialize Service Locator for Dependency Injection
     await ServiceLocator.initialize();
     AppLogger.success('Service Locator initialized');
@@ -34,8 +40,23 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize messaging service with app context
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final messagingService = FirebaseMessagingService();
+      messagingService.initialize(context: context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +75,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-//         child: const Icon(Icons.add),
-//       ),
-//     );
-//   }
-// }

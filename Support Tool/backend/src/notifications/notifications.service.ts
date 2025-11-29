@@ -26,6 +26,9 @@ export class NotificationsService {
 
     const response = await messaging.sendEachForMulticast(message);
     // response.successCount, response.failureCount, response.responses array
+    console.log(
+      `Notification sent to UID ${uid}: ${response.successCount} successful, ${response.failureCount} failed.`,
+    );
     return {
       success: response.successCount > 0,
       successCount: response.successCount,
