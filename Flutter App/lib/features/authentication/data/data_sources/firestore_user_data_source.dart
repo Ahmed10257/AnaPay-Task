@@ -31,17 +31,27 @@ class FirestoreUserDataSourceImpl implements FirestoreUserDataSource {
   @override
   Future<void> saveUserData(UserModel user) async {
     try {
-      AppLogger.info('Saving user data for UID: ${user.uid}');
+      AppLogger.info('🔔 FIRESTORE: Saving user data for UID: ${user.uid}');
+      AppLogger.info('🔔 FIRESTORE: User data: ${user.toFirestoreJson()}');
+      
+      if (user.fcmToken != null && user.fcmToken!.isNotEmpty) {
+        AppLogger.success('🔔 FIRESTORE: User has FCM token: ${user.fcmToken}');
+      } else {
+        AppLogger.warning('🔔 FIRESTORE: ⚠️ User has NO FCM token (null or empty)!');
+      }
 
+      final jsonData = user.toFirestoreJson();
+      AppLogger.debug('🔔 FIRESTORE: Saving JSON: $jsonData');
+      
       await _firestore
           .collection(_usersCollection)
           .doc(user.uid)
           .set(
-            user.toFirestoreJson(),
+            jsonData,
             SetOptions(merge: true),
           );
 
-      AppLogger.success('User data saved for UID: ${user.uid}');
+      AppLogger.success('🔔 FIRESTORE: ✅ User data saved for UID: ${user.uid}');
     } catch (e) {
       AppLogger.error('Error saving user data', e);
       throw AppFirebaseException(

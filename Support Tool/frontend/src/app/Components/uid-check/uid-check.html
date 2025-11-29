@@ -1,98 +1,161 @@
 <div class="min-h-screen flex items-center justify-center bg-gray-100 p-6">
 
   <div
-    class="w-full max-w-xl bg-white shadow-xl rounded-2xl p-8 space-y-6 border border-gray-200"
+    class="w-full max-w-xl bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200"
   >
-    <h1 class="text-2xl font-semibold text-gray-800 flex items-center gap-2">
-      <lucide-icon name="User" class="w-6 h-6 text-blue-600"></lucide-icon>
-      Support Tools
-    </h1>
-
-    <!-- UID Input -->
-    <div class="space-y-1">
-      <label class="text-sm font-medium text-gray-700">User UID</label>
-
-      <input
-        [(ngModel)]="uid"
-        placeholder="Enter user UID"
-        class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-      />
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
+      <h1 class="text-2xl font-semibold flex items-center gap-2">
+        <lucide-icon name="Settings" class="w-6 h-6"></lucide-icon>
+        Support Tools
+      </h1>
     </div>
 
-    <!-- Buttons -->
-    <div class="flex gap-4">
+    <!-- Tabs -->
+    <div class="flex border-b border-gray-200 bg-gray-50">
       <button
-        (click)="checkUser()"
-        class="flex-1 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-medium"
+        (click)="switchTab('check')"
+        [class.bg-white]="activeTab === 'check'"
+        [class.border-b-2]="activeTab === 'check'"
+        [class.border-blue-600]="activeTab === 'check'"
+        [class.text-blue-600]="activeTab === 'check'"
+        [class.text-gray-600]="activeTab !== 'check'"
+        class="flex-1 py-4 px-6 font-medium transition border-b-2 border-transparent"
       >
-        Check Firestore
+        <lucide-icon name="Search" class="w-4 h-4 inline mr-2"></lucide-icon>
+        Check User
       </button>
 
       <button
-        (click)="sendNotification()"
-        class="flex-1 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-medium"
+        (click)="switchTab('notify')"
+        [class.bg-white]="activeTab === 'notify'"
+        [class.border-b-2]="activeTab === 'notify'"
+        [class.border-blue-600]="activeTab === 'notify'"
+        [class.text-blue-600]="activeTab === 'notify'"
+        [class.text-gray-600]="activeTab !== 'notify'"
+        class="flex-1 py-4 px-6 font-medium transition border-b-2 border-transparent"
       >
+        <lucide-icon name="Bell" class="w-4 h-4 inline mr-2"></lucide-icon>
         Send Notification
       </button>
     </div>
 
-    <!-- Message -->
-    <div *ngIf="message" class="p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-200">
-      {{ message }}
-    </div>
+    <!-- Tab Content -->
+    <div class="p-8">
 
-    <!-- User Details Card -->
-    <div *ngIf="userJson" class="space-y-4">
-      <div class="flex items-center gap-2 pb-4 border-b border-gray-300">
-        <lucide-icon name="User" class="w-5 h-5 text-blue-600"></lucide-icon>
-        <h2 class="text-lg font-semibold text-gray-800">User Details</h2>
+      <!-- CHECK USER TAB -->
+      <div *ngIf="activeTab === 'check'" class="space-y-6 animate-fadeIn">
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-gray-700">User UID</label>
+          <input
+            [(ngModel)]="uid"
+            placeholder="Enter user UID"
+            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+          />
+        </div>
+
+        <button
+          (click)="checkUser()"
+          class="w-full py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-medium flex items-center justify-center gap-2"
+        >
+          <lucide-icon name="Search" class="w-5 h-5"></lucide-icon>
+          Check Firestore
+        </button>
+
+        <div *ngIf="checkMessage" class="p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-200">
+          {{ checkMessage }}
+        </div>
+
+        <!-- User Details Card -->
+        <div *ngIf="userJson" class="space-y-4">
+          <div class="flex items-center gap-2 pb-4 border-b border-gray-300">
+            <lucide-icon name="User" class="w-5 h-5 text-blue-600"></lucide-icon>
+            <h2 class="text-lg font-semibold text-gray-800">User Details</h2>
+          </div>
+
+          <!-- User Info Grid -->
+          <div class="grid grid-cols-1 gap-3">
+            <div *ngIf="userJson.uid" class="flex justify-between items-start bg-gray-50 p-3 rounded-lg">
+              <span class="font-medium text-gray-700">UID:</span>
+              <span class="text-gray-600 text-right break-all max-w-xs">{{ userJson.uid }}</span>
+            </div>
+
+            <div *ngIf="userJson.email" class="flex justify-between items-start bg-gray-50 p-3 rounded-lg">
+              <span class="font-medium text-gray-700">Email:</span>
+              <span class="text-gray-600 text-right break-all max-w-xs">{{ userJson.email }}</span>
+            </div>
+
+            <div *ngIf="userJson.displayName" class="flex justify-between items-start bg-gray-50 p-3 rounded-lg">
+              <span class="font-medium text-gray-700">Name:</span>
+              <span class="text-gray-600 text-right break-all max-w-xs">{{ userJson.displayName }}</span>
+            </div>
+
+            <div *ngIf="userJson.fcmToken" class="flex justify-between items-start bg-green-50 p-3 rounded-lg border border-green-200">
+              <span class="font-medium text-green-700">FCM Token:</span>
+              <span class="text-green-600 text-right break-all max-w-xs text-xs">{{ userJson.fcmToken }}</span>
+            </div>
+
+            <div *ngIf="userJson.createdAt" class="flex justify-between items-start bg-gray-50 p-3 rounded-lg">
+              <span class="font-medium text-gray-700">Created:</span>
+              <span class="text-gray-600 text-right break-all max-w-xs">{{ userJson.createdAt | date: 'short' }}</span>
+            </div>
+          </div>
+
+          <!-- Raw JSON (collapsible toggle) -->
+          <details class="mt-4">
+            <summary class="cursor-pointer font-medium text-gray-700 flex items-center gap-2 hover:text-blue-600">
+              <lucide-icon name="Search" class="w-4 h-4"></lucide-icon>
+              View Raw JSON
+            </summary>
+            <pre class="bg-black text-green-400 text-xs p-4 rounded-xl overflow-auto max-h-60 mt-2">{{ userJson | json }}</pre>
+          </details>
+        </div>
       </div>
 
-      <!-- User Info Grid -->
-      <div class="grid grid-cols-1 gap-3">
-        <div *ngIf="userJson.uid" class="flex justify-between items-start bg-gray-50 p-3 rounded-lg">
-          <span class="font-medium text-gray-700">UID:</span>
-          <span class="text-gray-600 text-right break-all max-w-xs">{{ userJson.uid }}</span>
+      <!-- SEND NOTIFICATION TAB -->
+      <div *ngIf="activeTab === 'notify'" class="space-y-6 animate-fadeIn">
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-gray-700">User UID</label>
+          <input
+            [(ngModel)]="notificationUid"
+            placeholder="Enter user UID"
+            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
+          />
         </div>
 
-        <div *ngIf="userJson.email" class="flex justify-between items-start bg-gray-50 p-3 rounded-lg">
-          <span class="font-medium text-gray-700">Email:</span>
-          <span class="text-gray-600 text-right break-all max-w-xs">{{ userJson.email }}</span>
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-gray-700">Notification Title</label>
+          <input
+            [(ngModel)]="notificationTitle"
+            placeholder="e.g., Payment Received"
+            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
+          />
         </div>
 
-        <div *ngIf="userJson.displayName" class="flex justify-between items-start bg-gray-50 p-3 rounded-lg">
-          <span class="font-medium text-gray-700">Name:</span>
-          <span class="text-gray-600 text-right break-all max-w-xs">{{ userJson.displayName }}</span>
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-gray-700">Notification Message</label>
+          <textarea
+            [(ngModel)]="notificationBody"
+            placeholder="e.g., Your payment of $100 was received"
+            rows="4"
+            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition resize-none"
+          ></textarea>
         </div>
 
-        <div *ngIf="userJson.phoneNumber" class="flex justify-between items-start bg-gray-50 p-3 rounded-lg">
-          <span class="font-medium text-gray-700">Phone:</span>
-          <span class="text-gray-600 text-right break-all max-w-xs">{{ userJson.phoneNumber }}</span>
-        </div>
+        <button
+          (click)="sendNotification()"
+          class="w-full py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-medium flex items-center justify-center gap-2"
+        >
+          <lucide-icon name="Send" class="w-5 h-5"></lucide-icon>
+          Send Notification
+        </button>
 
-        <div *ngIf="userJson.createdAt" class="flex justify-between items-start bg-gray-50 p-3 rounded-lg">
-          <span class="font-medium text-gray-700">Created:</span>
-          <span class="text-gray-600 text-right break-all max-w-xs">{{ userJson.createdAt | date: 'short' }}</span>
+        <div *ngIf="notifyMessage" [class.bg-green-50]="notifyMessage.includes('successfully')" [class.bg-red-50]="notifyMessage.includes('Failed')" [class.text-green-800]="notifyMessage.includes('successfully')" [class.text-red-800]="notifyMessage.includes('Failed')" [class.border-green-200]="notifyMessage.includes('successfully')" [class.border-red-200]="notifyMessage.includes('Failed')" class="p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-200">
+          {{ notifyMessage }}
         </div>
       </div>
 
-      <!-- Raw JSON (collapsible toggle) -->
-      <details class="mt-4">
-        <summary class="cursor-pointer font-medium text-gray-700 flex items-center gap-2 hover:text-blue-600">
-          <lucide-icon name="Search" class="w-4 h-4"></lucide-icon>
-          View Raw JSON
-        </summary>
-        <pre class="bg-black text-green-400 text-xs p-4 rounded-xl overflow-auto max-h-60 mt-2">{{ userJson | json }}</pre>
-      </details>
     </div>
-
-    <!-- JSON Viewer (fallback if needed) -->
-    <pre
-      *ngIf="userJson && false"
-      class="bg-black text-green-400 text-sm p-4 rounded-xl overflow-auto max-h-60"
-    >
-{{ userJson | json }}
-    </pre>
 
   </div>
 </div>

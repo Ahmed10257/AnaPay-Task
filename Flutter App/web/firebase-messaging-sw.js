@@ -18,14 +18,69 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Handle background messages
+// 🔔 Handle background messages
 messaging.onBackgroundMessage(function (payload) {
-  console.log("Received background message ", payload);
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: "/icons/Icon-192.png",
-  };
+  console.log("🔔 SERVICE WORKER: Background message received", payload);
+  
+  try {
+    const notificationTitle = payload.notification?.title || "Notification";
+    const notificationBody = payload.notification?.body || "You have a new message";
+    
+    console.log("🔔 SERVICE WORKER: Title:", notificationTitle);
+    console.log("🔔 SERVICE WORKER: Body:", notificationBody);
+    console.log("🔔 SERVICE WORKER: Showing notification...");
+    
+    const notificationOptions = {
+      body: notificationBody,
+      icon: "/icons/Icon-192.png",
+      badge: "/icons/Icon-192.png",
+      tag: "notification-tag",
+      requireInteraction: false,
+      data: payload.data || {},
+    };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+    return self.registration.showNotification(notificationTitle, notificationOptions)
+      .then(() => {
+        console.log("🔔 SERVICE WORKER: ✅ Notification shown successfully");
+      })
+      .catch((error) => {
+        console.error("🔔 SERVICE WORKER: ❌ Error showing notification:", error);
+      });
+  } catch (error) {
+    console.error("🔔 SERVICE WORKER: ❌ Error in onBackgroundMessage handler:", error);
+  }
 });
+
+// 🔔 Log when service worker is activated
+self.addEventListener("activate", function (event) {
+  console.log("🔔 SERVICE WORKER: Activated - ready to receive messages");
+  event.waitUntil(clients.claim());
+});
+
+// 🔔 Log when service worker is installed
+self.addEventListener("install", function (event) {
+  console.log("🔔 SERVICE WORKER: Installed");
+  event.waitUntil(self.skipWaiting());
+});
+
+// 🔔 Handle notification clicks
+self.addEventListener("notificationclick", function (event) {
+  console.log("🔔 SERVICE WORKER: Notification clicked:", event.notification.title);
+  event.notification.close();
+  
+  event.waitUntil(
+    clients.matchAll({ type: "window" }).then(function (clientList) {
+      // Focus existing window if open
+      for (let i = 0; i < clientList.length; i++) {
+        if (clientList[i].url === "/" && "focus" in clientList[i]) {
+          return clientList[i].focus();
+        }
+      }
+      // Open new window if not open
+      if (clients.openWindow) {
+        return clients.openWindow("/");
+      }
+    })
+  );
+});
+

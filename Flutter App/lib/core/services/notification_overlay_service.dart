@@ -26,22 +26,31 @@ class NotificationOverlayService {
     Color textColor = Colors.white,
     IconData icon = Icons.notifications_active,
   }) {
-    AppLogger.info('Showing notification: $title - $message');
+    AppLogger.info('🔔 Showing notification: $title - $message');
 
     try {
+      // Verify context is valid
+      if (!context.mounted) {
+        AppLogger.warning('🔔 Context not mounted, skipping notification');
+        return;
+      }
+
       // Check if overlay is available
       final overlay = Overlay.of(context, rootOverlay: true);
       if (overlay == null) {
-        AppLogger.warning('Overlay not available, skipping notification');
+        AppLogger.warning('🔔 ❌ Overlay not available in context');
         return;
       }
+
+      AppLogger.success('🔔 Overlay found, inserting notification entry');
 
       // Remove existing notification safely
       if (_overlayEntry != null) {
         try {
           _overlayEntry!.remove();
+          AppLogger.debug('🔔 Removed previous overlay entry');
         } catch (e) {
-          AppLogger.debug('Previous overlay entry already removed: $e');
+          AppLogger.debug('🔔 Previous overlay entry already removed: $e');
         }
         _overlayEntry = null;
       }
@@ -62,13 +71,16 @@ class NotificationOverlayService {
       );
 
       overlay.insert(_overlayEntry!);
+      AppLogger.success('🔔 ✅ Notification displayed successfully');
 
       // Auto-dismiss after duration
       Future.delayed(duration, () {
         _removeNotification();
       });
     } catch (e) {
-      AppLogger.error('Error showing notification overlay', e);
+      AppLogger.error('🔔 ❌ Error showing notification overlay: $e');
+      // Log the stack trace for debugging
+      AppLogger.debug('Stack trace: ${StackTrace.current}');
     }
   }
 

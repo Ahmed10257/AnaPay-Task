@@ -205,7 +205,7 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
   @override
   Future<String?> getFCMToken() async {
     try {
-      AppLogger.info('Requesting FCM permission');
+      AppLogger.info('🔔 TOKEN STEP 1: Requesting FCM permission...');
 
       NotificationSettings? settings;
       try {
@@ -218,34 +218,38 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
           sound: true,
         ).timeout(const Duration(seconds: 5));
       } catch (e) {
-        AppLogger.warning('FCM permission request timed out or failed: $e');
+        AppLogger.warning('🔔 TOKEN STEP 1: Permission request timed out or failed: $e');
         return null;
       }
 
-      AppLogger.info('FCM permission status: ${settings.authorizationStatus}');
+      AppLogger.info('🔔 TOKEN STEP 2: FCM permission status: ${settings.authorizationStatus}');
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        AppLogger.info('🔔 TOKEN STEP 3: Permission authorized, requesting token...');
+        
         final token = await _firebaseMessaging.getToken(
           vapidKey: 'BMp0hJzR817YbVQH3F7vggxfMDmGxGN15Gd0TlVtKgT7CrXnuldBrMyhOKHisxU7wCixhNVkEFMhKYHoXpoT_Wo',
         ).timeout(
           const Duration(seconds: 5),
           onTimeout: () {
-            AppLogger.warning('FCM token request timed out');
+            AppLogger.warning('🔔 TOKEN STEP 3: FCM token request timed out');
             return null;
           },
         );
 
-        if (token != null) {
-          AppLogger.success('FCM token obtained: $token');
+        if (token != null && token.isNotEmpty) {
+          AppLogger.success('🔔 TOKEN STEP 4: ✅ FCM token obtained: $token');
+          return token;
+        } else {
+          AppLogger.warning('🔔 TOKEN STEP 4: ⚠️ Token is null or empty');
+          return null;
         }
-
-        return token;
       } else {
-        AppLogger.warning('FCM permission not granted');
+        AppLogger.warning('🔔 TOKEN STEP 2: ⚠️ FCM permission NOT authorized. Status: ${settings.authorizationStatus}');
         return null;
       }
     } catch (e) {
-      AppLogger.warning('Error getting FCM token: $e');
+      AppLogger.error('🔔 TOKEN ERROR: Error getting FCM token: $e');
       return null;
     }
   }

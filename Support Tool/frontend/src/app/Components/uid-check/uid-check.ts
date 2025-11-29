@@ -13,30 +13,73 @@ import { LucideAngularModule } from 'lucide-angular';
 })
 export class UidCheck {
 
+  // Tab management
+  activeTab: 'check' | 'notify' = 'check';
+
+  // Check User Tab
   uid = '';
   userJson: any = null;
-  message = '';
+  checkMessage = '';
+
+  // Send Notification Tab
+  notificationUid = '';
+  notificationTitle = 'Hello';
+  notificationBody = 'Test notification';
+  notifyMessage = '';
 
   constructor(private usersService: UsersService, private notificationsService: NotificationsService) {}
 
+  // Switch tabs
+  switchTab(tab: 'check' | 'notify') {
+    this.activeTab = tab;
+  }
+
   checkUser() {
+    if (!this.uid.trim()) {
+      this.checkMessage = 'Please enter a UID';
+      return;
+    }
+
+    this.checkMessage = 'Searching...';
     this.usersService.getUser(this.uid).subscribe(
       (user) => {
         this.userJson = this.parseFirestoreUser(user);
-        this.message = 'User found';
+        this.checkMessage = 'User found ✅';
       },
       (error) => {
         this.userJson = null;
-        this.message = 'User not found';
+        this.checkMessage = 'User not found ❌';
       }
     );
   }
 
   sendNotification() {
-    this.message = 'Sending...';
-    this.notificationsService.sendNotification(this.uid, 'Hello', 'Test notification').subscribe({
-      next: res => { this.message = 'Notification attempt finished'; console.log(res); },
-      error: err => { this.message = `Failed: ${err?.message || err.status}`; }
+    if (!this.notificationUid.trim()) {
+      this.notifyMessage = 'Please enter a UID first';
+      return;
+    }
+    if (!this.notificationTitle.trim()) {
+      this.notifyMessage = 'Please enter a notification title';
+      return;
+    }
+    if (!this.notificationBody.trim()) {
+      this.notifyMessage = 'Please enter a notification message';
+      return;
+    }
+
+    this.notifyMessage = 'Sending...';
+    this.notificationsService.sendNotification(
+      this.notificationUid,
+      this.notificationTitle,
+      this.notificationBody
+    ).subscribe({
+      next: res => {
+        this.notifyMessage = 'Notification sent successfully ✅';
+        console.log(res);
+      },
+      error: err => {
+        this.notifyMessage = `Failed: ${err?.message || err.status}`;
+      }
     });
   }
 
