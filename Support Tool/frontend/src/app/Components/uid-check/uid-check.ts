@@ -11,7 +11,7 @@ import { LucideAngularModule } from 'lucide-angular';
   templateUrl: './uid-check.html',
   styleUrl: './uid-check.css',
 })
-export class UidCheck {
+export class UidCheckComponent {
 
   // Tab management
   activeTab: 'check' | 'notify' = 'check';
@@ -44,11 +44,11 @@ export class UidCheck {
     this.usersService.getUser(this.uid).subscribe(
       (user) => {
         this.userJson = this.parseFirestoreUser(user);
-        this.checkMessage = 'User found ✅';
+        this.checkMessage = 'User found ';
       },
       (error) => {
         this.userJson = null;
-        this.checkMessage = 'User not found ❌';
+        this.checkMessage = 'User not found ';
       }
     );
   }
@@ -74,7 +74,7 @@ export class UidCheck {
       this.notificationBody
     ).subscribe({
       next: res => {
-        this.notifyMessage = 'Notification sent successfully ✅';
+        this.notifyMessage = 'Notification sent successfully';
         console.log(res);
       },
       error: err => {

@@ -1,9 +1,19 @@
 import { Routes } from '@angular/router';
-import { UidCheck } from './Components/uid-check/uid-check';
+import { UidCheckComponent } from './Components/uid-check/uid-check';
+import { CLIInterfaceComponent } from './Components/cli-interface/cli-interface';
 
 export const routes: Routes = [
-    {
-        path: '',
-        component: UidCheck
-    }
+  {
+    path: 'gui',
+    component: UidCheckComponent
+  },
+  {
+    path: 'cli',
+    component: CLIInterfaceComponent
+  },
+  {
+    path: '',
+    redirectTo: 'gui',
+    pathMatch: 'full'
+  }
 ];

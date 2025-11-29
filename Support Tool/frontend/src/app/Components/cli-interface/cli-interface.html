@@ -1,0 +1,43 @@
+<div class="cli-container">
+  <!-- CLI Header -->
+  <div class="cli-header">
+    <div class="header-title">
+      <lucide-icon name="Terminal" class="w-5 h-5"></lucide-icon>
+      CLI Interface
+    </div>
+    <div class="header-info">Type 'help' for available commands</div>
+  </div>
+
+  <!-- Terminal Output -->
+  <div class="cli-terminal">
+    <div *ngFor="let line of commandHistory" [ngClass]="'output-' + line.type">
+      {{ line.output }}
+    </div>
+    <div *ngIf="isLoading" class="output-info">
+      <span class="loader"></span> Processing...
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div class="cli-input-wrapper">
+    <div class="cli-prompt">
+      <span class="prompt-symbol">$</span>
+      <input
+        type="text"
+        [(ngModel)]="commandInput"
+        (keydown)="onKeyDown($event)"
+        placeholder="Enter command..."
+        class="cli-input"
+        [disabled]="isLoading"
+      />
+    </div>
+    <button
+      (click)="executeCommand()"
+      [disabled]="isLoading || !commandInput.trim()"
+      class="execute-btn"
+    >
+      <lucide-icon name="Send" class="w-4 h-4"></lucide-icon>
+      Execute
+    </button>
+  </div>
+</div>
