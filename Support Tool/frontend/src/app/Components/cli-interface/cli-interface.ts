@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 
-
 interface CLIOutput {
   command: string;
   timestamp: Date;
@@ -14,9 +13,9 @@ interface CLIOutput {
 @Component({
   selector: 'app-cli-interface',
   standalone: true,
-  imports: [CommonModule, FormsModule,LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './cli-interface.html',
-  styleUrls: ['./cli-interface.css']
+  styleUrls: ['./cli-interface.css'],
 })
 export class CLIInterfaceComponent implements OnInit {
   commandInput: string = '';
@@ -48,7 +47,7 @@ Examples:
 
 Type 'help' for more information.
       `,
-      type: 'info'
+      type: 'info',
     };
     this.commandHistory.push(welcome);
     this.scrollToBottom();
@@ -101,8 +100,8 @@ Type 'help' for more information.
 
     // Call backend to fetch user
     fetch(`${this.apiBaseUrl}/firestore/user/${userId}`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.error) {
           this.printError(`Error: ${data.error}`);
         } else {
@@ -117,15 +116,21 @@ Created:              ${data.createdAt ? new Date(data.createdAt).toLocaleString
 Updated:              ${data.updatedAt ? new Date(data.updatedAt).toLocaleString() : 'N/A'}
 ─────────────────────────────────────────────────
 FCM Token:            ${data.fcmToken ? '✓ Present' : '✗ Not found'}
-Token Updated:        ${data.fcmTokenUpdatedAt ? new Date(data.fcmTokenUpdatedAt).toLocaleString() : 'N/A'}
+Token Updated:        ${
+            data.fcmTokenUpdatedAt ? new Date(data.fcmTokenUpdatedAt).toLocaleString() : 'N/A'
+          }
 ─────────────────────────────────────────────────
-${data.fcmToken ? `Token (truncated): ${data.fcmToken.substring(0, 50)}...` : 'No FCM token available'}`;
+${
+  data.fcmToken
+    ? `Token (truncated): ${data.fcmToken.substring(0, 50)}...`
+    : 'No FCM token available'
+}`;
           this.printSuccess(output);
         }
         this.isLoading = false;
         this.scrollToBottom();
       })
-      .catch(err => {
+      .catch((err) => {
         this.printError(`Connection error: ${err.message}`);
         this.isLoading = false;
         this.scrollToBottom();
@@ -144,16 +149,21 @@ ${data.fcmToken ? `Token (truncated): ${data.fcmToken.substring(0, 50)}...` : 'N
     // Parse message from command
     const messageMatch = userCommand.match(/--message\s+"([^"]+)"/);
     if (!messageMatch) {
-      this.printError('Missing --message parameter. Usage: push <user_id> --message "your message"');
+      this.printError(
+        'Missing --message parameter. Usage: push <user_id> --message "your message"'
+      );
       this.isLoading = false;
       return;
     }
 
     const message = messageMatch[1];
+    console.log(messageMatch);
+    console.log(message);
     this.printInfo(`Sending notification to user: ${userId}...`);
 
     // Extract title and body from message (or use defaults)
     const messageParts = message.split('|');
+    console.log(messageParts);
     const title = messageParts[0] || 'Test Notification';
     const body = messageParts[1] || message;
 
@@ -161,16 +171,16 @@ ${data.fcmToken ? `Token (truncated): ${data.fcmToken.substring(0, 50)}...` : 'N
     fetch(`${this.apiBaseUrl}/notifications/send`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         uid: userId,
         title: title,
-        body: body
-      })
+        body: body,
+      }),
     })
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.error) {
           const errorOutput = `
 FCM API Response (Error):
@@ -179,6 +189,7 @@ Status:     FAILED
 Error:      ${data.error}
 Message:    ${data.message || 'No additional details'}
 ─────────────────────────────────────────────────`;
+          console.log(data);
           this.printError(errorOutput);
         } else {
           const successOutput = `
@@ -191,12 +202,13 @@ User ID:    ${userId}
 Title:      ${title}
 Body:       ${body}
 ─────────────────────────────────────────────────`;
+          console.log(data);
           this.printSuccess(successOutput);
         }
         this.isLoading = false;
         this.scrollToBottom();
       })
-      .catch(err => {
+      .catch((err) => {
         this.printError(`Connection error: ${err.message}`);
         this.isLoading = false;
         this.scrollToBottom();
@@ -235,7 +247,7 @@ clear
       command: command,
       timestamp: new Date(),
       output: `$ ${command}`,
-      type: 'info'
+      type: 'info',
     };
     this.commandHistory.push(output);
     this.scrollToBottom();
@@ -246,7 +258,7 @@ clear
       command: '',
       timestamp: new Date(),
       output: message,
-      type: 'success'
+      type: 'success',
     };
     this.commandHistory.push(output);
     this.scrollToBottom();
@@ -257,7 +269,7 @@ clear
       command: '',
       timestamp: new Date(),
       output: message,
-      type: 'error'
+      type: 'error',
     };
     this.commandHistory.push(output);
     this.scrollToBottom();
@@ -268,7 +280,7 @@ clear
       command: '',
       timestamp: new Date(),
       output: message,
-      type: 'info'
+      type: 'info',
     };
     this.commandHistory.push(output);
     this.scrollToBottom();

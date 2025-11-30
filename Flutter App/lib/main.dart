@@ -10,6 +10,9 @@ import 'config/routes/app_routes.dart';
 import 'features/authentication/presentation/pages/register_page.dart';
 import 'features/authentication/presentation/pages/login_page.dart';
 import 'features/home/presentation/pages/home_page.dart' as home;
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_app_check/firebase_app_check.dart'
+    show AndroidProvider, AppleProvider, ReCaptchaV3Provider;
 
 // Global key to access Navigator context
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -27,18 +30,20 @@ void main() async {
     // Initialize Service Locator for Dependency Injection
     await ServiceLocator.initialize();
     AppLogger.success('Service Locator initialized');
-    
+
     // Note: Firebase Messaging permission request moved to login flow
     // because on web, it requires user interaction (click)
   } catch (e) {
     AppLogger.error('Initialization error', e);
   }
 
-  runApp(
-    DevicePreview(
-      builder: (context) => const MyApp(),
-    ),
+  await FirebaseAppCheck.instance.activate(
+    androidProvider: AndroidProvider.playIntegrity,
+    appleProvider: AppleProvider.deviceCheck,
+    webProvider: ReCaptchaV3Provider('TooXUi'), // only for web
   );
+
+  runApp(DevicePreview(builder: (context) => const MyApp()));
 }
 
 class MyApp extends StatefulWidget {
@@ -58,7 +63,9 @@ class _MyAppState extends State<MyApp> {
       final context = navigatorKey.currentContext;
       if (context != null && context.mounted) {
         messagingService.initialize(context: context);
-        AppLogger.info('🔔 Firebase Messaging Service initialized with Navigator context');
+        AppLogger.info(
+          '🔔 Firebase Messaging Service initialized with Navigator context',
+        );
       } else {
         AppLogger.warning('🔔 Navigator context not available yet');
       }
