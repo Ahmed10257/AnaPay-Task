@@ -27,6 +27,19 @@ void main() async {
     );
     AppLogger.success('Firebase initialized successfully');
 
+    // Activate Firebase App Check BEFORE Service Locator
+    await FirebaseAppCheck.instance.activate(
+      // androidProvider: AndroidProvider.playIntegrity,
+      androidProvider: AndroidProvider.debug,
+      appleProvider: AppleProvider.deviceCheck,
+      webProvider: ReCaptchaV3Provider('6LcMKh0sAAAAAPQWsAkxQ4OXyCBMtaZK5fpbNfl4'), // only for web
+    );
+    AppLogger.success('Firebase App Check activated');
+
+    // Force refresh App Check token
+    await FirebaseAppCheck.instance.getToken(true);
+    AppLogger.success('App Check token refreshed');
+
     // Initialize Service Locator for Dependency Injection
     await ServiceLocator.initialize();
     AppLogger.success('Service Locator initialized');
@@ -35,13 +48,8 @@ void main() async {
     // because on web, it requires user interaction (click)
   } catch (e) {
     AppLogger.error('Initialization error', e);
+    rethrow;
   }
-
-  await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.playIntegrity,
-    appleProvider: AppleProvider.deviceCheck,
-    webProvider: ReCaptchaV3Provider('TooXUi'), // only for web
-  );
 
   runApp(DevicePreview(builder: (context) => const MyApp()));
 }
