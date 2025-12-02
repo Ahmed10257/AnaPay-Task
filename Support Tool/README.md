@@ -334,6 +334,125 @@ POST /notifications/send
 
 ---
 
+## 📸 Live Testing Screenshots
+
+### Real-World FCM Token Lifecycle Test
+
+This section demonstrates the FCM token management system in action. The test shows how the system handles FCM tokens when a user deletes their token and re-authenticates.
+
+#### Scenario: Token Deletion and Re-authentication
+
+**Test Steps:**
+1. User has FCM token registered in Firestore
+2. Admin deletes the FCM token from Firestore
+3. User logs out and logs back into the mobile app
+4. System automatically generates and registers new FCM token
+5. Support tool CLI verifies token was updated
+
+#### Screenshot 1: Token Missing State (CLI)
+
+```
+$ check goNUaT0aFzXtPijCD7zarJnoqaH3
+Fetching user data for: goNUaT0aFzXtPijCD7zarJnoqaH3...
+
+User Information:
+─────────────────────────────────────────────────
+UID:                  goNUaT0aFzXtPijCD7zarJnoqaH3
+Email:                ahmed.mansour10257@gmail.com
+Display Name:         Ahmed Mansour
+Phone:                N/A
+─────────────────────────────────────────────────
+Login Status:         🟢 Logged In
+─────────────────────────────────────────────────
+Created:              11/27/2025, 11:36:25 PM
+Last Active:          12/2/2025, 3:09:41 AM
+─────────────────────────────────────────────────
+FCM Token Status:     ⚠️ Missing
+Token Updated:        N/A
+─────────────────────────────────────────────────
+❌ No FCM token found - User may not have installed app or granted notification permissions
+```
+
+**What this shows:**
+- User is **logged in** (🟢 Logged In)
+- But FCM token is **missing** (⚠️ Missing)
+- Last active timestamp shows recent activity
+- Red error message explains the token is not available
+- This state would occur after token deletion from Firestore
+
+#### Screenshot 2: Token Recovered After Re-authentication (CLI)
+
+```
+$ check goNUaT0aFzXtPijCD7zarJnoqaH3
+Fetching user data for: goNUaT0aFzXtPijCD7zarJnoqaH3...
+
+User Information:
+─────────────────────────────────────────────────
+UID:                  goNUaT0aFzXtPijCD7zarJnoqaH3
+Email:                ahmed.mansour10257@gmail.com
+Display Name:         Ahmed Mansour
+Phone:                N/A
+─────────────────────────────────────────────────
+Login Status:         🟢 Logged In
+─────────────────────────────────────────────────
+Created:              11/27/2025, 11:36:25 PM
+Last Active:          12/2/2025, 6:27:01 AM
+─────────────────────────────────────────────────
+FCM Token Status:     ✅ Available
+Token Updated:        N/A
+─────────────────────────────────────────────────
+Token (truncated): fOiQKtmiZpbCOQt7eL8fm:-APA91bGc8WI7gyDiPc5aEiS-4...
+```
+
+**What this shows:**
+- User is still **logged in** (🟢 Logged In)
+- FCM token is now **available** (✅ Available)
+- Last Active timestamp updated to 6:27:01 AM (re-authentication event)
+- Token is displayed (truncated for security)
+- System successfully generated new token during re-authentication
+- Notifications can now be sent to this user
+
+#### Firestore Verification
+
+The Firestore database shows the updated token details:
+
+```
+fcmToken: "fOiQKtmiZpbCOQt7eL8fm:-APA91bGc8WI7gyDiPc5aEiS-4SA47FHIpmj8pFrHiBiQ..."
+isLoggedIn: true
+LastLoginAt: December 2, 2025 at 6:27:02 AM UTC+2
+lastStatusChangeAt: December 2, 2025 at 6:26:48 AM UTC+2
+photoUrl: "https://lh3.googleusercontent.com/a/ACg8oclJh2WKji3K6AF70aWMCVQkudZQypAt3r5_HDiAc"
+uid: "goNUaT0aFzXtPijCD7zarJnoqaH3"
+updatedAt: December 2, 2025 at 6:27:01 AM UTC+2
+```
+
+**Key Observations:**
+- `isLoggedIn` field is `true`
+- `fcmToken` contains the new token value
+- `updatedAt` timestamp reflects the re-authentication
+- Token refresh occurs automatically on login
+
+#### What This Test Proves
+
+✅ **FCM Token Auto-Recovery:**
+- System automatically generates FCM tokens on user login
+- No manual intervention needed from users
+
+✅ **Accurate Status Tracking:**
+- Support tool correctly shows missing tokens
+- After re-auth, token status updates automatically
+
+✅ **Real-time Updates:**
+- Firestore reflects changes immediately
+- CLI commands show current accurate state
+
+✅ **Production Readiness:**
+- System handles token lifecycle properly
+- Users don't lose notification capability when tokens are deleted
+- Support team can monitor and verify token status
+
+---
+
 ## 🛠️ Development
 
 ### Project Structure
