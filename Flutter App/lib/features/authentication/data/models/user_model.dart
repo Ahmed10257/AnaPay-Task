@@ -13,6 +13,7 @@ class UserModel extends UserEntity {
     String? fcmToken,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool isLoggedIn = false,
   }) : super(
     uid: uid,
     email: email,
@@ -21,10 +22,11 @@ class UserModel extends UserEntity {
     fcmToken: fcmToken,
     createdAt: createdAt,
     updatedAt: updatedAt,
+    isLoggedIn: isLoggedIn,
   );
 
   /// Create from Firebase User
-  factory UserModel.fromFirebaseUser(User firebaseUser, {String? fcmToken}) {
+  factory UserModel.fromFirebaseUser(User firebaseUser, {String? fcmToken, bool isLoggedIn = true}) {
     return UserModel(
       uid: firebaseUser.uid,
       email: firebaseUser.email ?? '',
@@ -33,6 +35,7 @@ class UserModel extends UserEntity {
       fcmToken: fcmToken,
       createdAt: firebaseUser.metadata.creationTime,
       updatedAt: firebaseUser.metadata.lastSignInTime,
+      isLoggedIn: isLoggedIn,
     );
   }
 
@@ -46,6 +49,7 @@ class UserModel extends UserEntity {
       fcmToken: json['fcmToken'] as String?,
       createdAt: (json['createdAt'] as dynamic)?.toDate() as DateTime?,
       updatedAt: (json['updatedAt'] as dynamic)?.toDate() as DateTime?,
+      isLoggedIn: json['isLoggedIn'] as bool? ?? false,
     );
   }
 
@@ -59,6 +63,8 @@ class UserModel extends UserEntity {
       'fcmToken': fcmToken,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      'isLoggedIn': isLoggedIn,
+      'lastLoginAt': DateTime.now(),
     };
   }
 
@@ -71,6 +77,7 @@ class UserModel extends UserEntity {
     String? fcmToken,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? isLoggedIn,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -80,6 +87,7 @@ class UserModel extends UserEntity {
       fcmToken: fcmToken ?? this.fcmToken,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      isLoggedIn: isLoggedIn ?? this.isLoggedIn,
     );
   }
 }

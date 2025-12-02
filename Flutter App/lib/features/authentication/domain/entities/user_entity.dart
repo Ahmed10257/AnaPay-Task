@@ -9,6 +9,7 @@ class UserEntity {
   final String? fcmToken;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final bool isLoggedIn;
 
   UserEntity({
     required this.uid,
@@ -18,6 +19,7 @@ class UserEntity {
     this.fcmToken,
     this.createdAt,
     this.updatedAt,
+    this.isLoggedIn = false,
   });
 
   /// Create a copy with modified fields
@@ -29,6 +31,7 @@ class UserEntity {
     String? fcmToken,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? isLoggedIn,
   }) {
     return UserEntity(
       uid: uid ?? this.uid,
@@ -38,6 +41,7 @@ class UserEntity {
       fcmToken: fcmToken ?? this.fcmToken,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      isLoggedIn: isLoggedIn ?? this.isLoggedIn,
     );
   }
 

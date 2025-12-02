@@ -18,6 +18,9 @@ abstract class FirestoreUserDataSource {
 
   /// Delete user data from Firestore
   Future<void> deleteUserData(String uid);
+
+  /// Set user login status
+  Future<void> setUserLoginStatus(String uid, bool isLoggedIn);
 }
 
 class FirestoreUserDataSourceImpl implements FirestoreUserDataSource {
@@ -122,6 +125,29 @@ class FirestoreUserDataSourceImpl implements FirestoreUserDataSource {
       AppLogger.error('Error deleting user data', e);
       throw AppFirebaseException(
         message: 'Failed to delete user data: $e',
+        originalException: e,
+      );
+    }
+  }
+
+  @override
+  Future<void> setUserLoginStatus(String uid, bool isLoggedIn) async {
+    try {
+      AppLogger.info('Setting login status for UID: $uid to $isLoggedIn');
+
+      await _firestore
+          .collection(_usersCollection)
+          .doc(uid)
+          .update({
+            'isLoggedIn': isLoggedIn,
+            'lastStatusChangeAt': DateTime.now(),
+          });
+
+      AppLogger.success('Login status updated for UID: $uid');
+    } catch (e) {
+      AppLogger.error('Error updating login status', e);
+      throw AppFirebaseException(
+        message: 'Failed to update login status: $e',
         originalException: e,
       );
     }

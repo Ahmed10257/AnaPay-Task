@@ -123,6 +123,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> signOut() async {
     try {
+      final currentUser = _firebaseAuthDataSource.getCurrentFirebaseUser();
+      if (currentUser != null) {
+        // Set user login status to false before signing out
+        await _firestoreUserDataSource.setUserLoginStatus(currentUser.uid, false);
+      }
+      
       await _firebaseAuthDataSource.signOut();
       return const Right(null);
     } on AppFirebaseException catch (e) {

@@ -85,6 +85,26 @@
               <span class="text-gray-600 text-right break-all max-w-xs">{{ userJson.email }}</span>
             </div>
 
+            <div *ngIf="userJson.isLoggedIn !== undefined" class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border"
+              [class.border-green-300]="userJson.isLoggedIn"
+              [class.border-red-300]="!userJson.isLoggedIn"
+              [class.bg-green-50]="userJson.isLoggedIn"
+              [class.bg-red-50]="!userJson.isLoggedIn">
+              <span class="font-medium" 
+                [class.text-green-700]="userJson.isLoggedIn"
+                [class.text-red-700]="!userJson.isLoggedIn">
+                Login Status:
+              </span>
+              <span class="px-3 py-1 rounded-full font-medium text-sm flex items-center gap-2"
+                [class.bg-green-200]="userJson.isLoggedIn"
+                [class.text-green-800]="userJson.isLoggedIn"
+                [class.bg-red-200]="!userJson.isLoggedIn"
+                [class.text-red-800]="!userJson.isLoggedIn">
+                <lucide-icon [name]="userJson.isLoggedIn ? 'CheckCircle' : 'XCircle'" class="w-4 h-4"></lucide-icon>
+                {{ userJson.isLoggedIn ? 'Logged In' : 'Logged Out' }}
+              </span>
+            </div>
+
             <div *ngIf="userJson.displayName" class="flex justify-between items-start bg-gray-50 p-3 rounded-lg">
               <span class="font-medium text-gray-700">Name:</span>
               <span class="text-gray-600 text-right break-all max-w-xs">{{ userJson.displayName }}</span>
