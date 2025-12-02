@@ -19,6 +19,16 @@ export class NotificationsService {
 
       // Check login status
       if (!userData.isLoggedIn) {
+        // Log failed notification - user not logged in
+        await this.firestoreService.logNotification(
+          uid,
+          title,
+          body,
+          'failed',
+          'user_not_logged_in',
+          userData.email as string,
+        );
+
         return {
           success: false,
           delivered: false,
@@ -30,6 +40,16 @@ export class NotificationsService {
 
       const tokens = await this.firestoreService.getUserTokens(uid);
       if (!tokens || tokens.length === 0) {
+        // Log failed notification - no tokens
+        await this.firestoreService.logNotification(
+          uid,
+          title,
+          body,
+          'failed',
+          'no_tokens',
+          userData.email as string,
+        );
+
         return {
           success: false,
           delivered: false,
@@ -45,9 +65,22 @@ export class NotificationsService {
       };
 
       const response = await messaging.sendEachForMulticast(message);
+      const wasDelivered = response.successCount > 0;
+
+      // Log notification attempt
+      await this.firestoreService.logNotification(
+        uid,
+        title,
+        body,
+        wasDelivered ? 'delivered' : 'failed',
+        wasDelivered ? undefined : `${response.failureCount} token(s) failed`,
+        userData.email as string,
+      );
+
       console.log(
         `Notification sent to UID ${uid}: ${response.successCount} successful, ${response.failureCount} failed.`,
       );
+
       return {
         success: response.successCount > 0,
         delivered: response.successCount > 0,
@@ -59,14 +92,24 @@ export class NotificationsService {
             : { success: false, error: r.error?.message },
         ),
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      // Log failed notification - error occurred
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      await this.firestoreService.logNotification(
+        uid,
+        title,
+        body,
+        'failed',
+        errorMessage,
+      );
+
       console.error('Error sending notification:', error);
       return {
         success: false,
         delivered: false,
         reason: 'error',
-        message:
-          error instanceof Error ? error.message : 'Unknown error occurred',
+        message: errorMessage,
       };
     }
   }

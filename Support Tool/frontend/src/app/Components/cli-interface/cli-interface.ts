@@ -43,7 +43,7 @@ Available Commands:
 
 Examples:
   check user123abc
-  push user123abc --message "Test notification"
+  push user123abc --message "Notification Title|This is the body of the notification."
 
 Type 'help' for more information.
       `,
@@ -105,6 +105,18 @@ Type 'help' for more information.
         if (data.error) {
           this.printError(`Error: ${data.error}`);
         } else {
+          // Parse Firestore timestamps (they have _seconds property)
+          const parseFirestoreDate = (timestamp: any) => {
+            if (!timestamp) return 'N/A';
+            if (timestamp._seconds) {
+              return new Date(timestamp._seconds * 1000).toLocaleString();
+            }
+            return new Date(timestamp).toLocaleString();
+          };
+
+          const loginStatus = data.isLoggedIn
+            ? '🟢 Logged In'
+            : '🔴 Logged Out';
           const output = `
 User Information:
 ─────────────────────────────────────────────────
@@ -112,13 +124,14 @@ UID:                  ${data.uid || 'N/A'}
 Email:                ${data.email || 'N/A'}
 Display Name:         ${data.displayName || 'N/A'}
 Phone:                ${data.phoneNumber || 'N/A'}
-Created:              ${data.createdAt ? new Date(data.createdAt).toLocaleString() : 'N/A'}
-Updated:              ${data.updatedAt ? new Date(data.updatedAt).toLocaleString() : 'N/A'}
+─────────────────────────────────────────────────
+Login Status:         ${loginStatus}
+─────────────────────────────────────────────────
+Created:              ${parseFirestoreDate(data.createdAt)}
+Last Active:          ${parseFirestoreDate(data.updatedAt)}
 ─────────────────────────────────────────────────
 FCM Token:            ${data.fcmToken ? '✓ Present' : '✗ Not found'}
-Token Updated:        ${
-            data.fcmTokenUpdatedAt ? new Date(data.fcmTokenUpdatedAt).toLocaleString() : 'N/A'
-          }
+Token Updated:        ${parseFirestoreDate(data.fcmTokenUpdatedAt)}
 ─────────────────────────────────────────────────
 ${
   data.fcmToken
@@ -181,29 +194,38 @@ ${
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.error) {
-          const errorOutput = `
-FCM API Response (Error):
-─────────────────────────────────────────────────
-Status:     FAILED
-Error:      ${data.error}
-Message:    ${data.message || 'No additional details'}
-─────────────────────────────────────────────────`;
-          console.log(data);
-          this.printError(errorOutput);
-        } else {
+        // Check if notification was actually delivered
+        if (data.delivered) {
           const successOutput = `
-FCM API Response (Success):
+FCM Notification Delivery Status:
 ─────────────────────────────────────────────────
-Status:     SUCCESS
-Message ID: ${data.messageId || 'N/A'}
-Timestamp:  ${new Date().toLocaleString()}
-User ID:    ${userId}
-Title:      ${title}
-Body:       ${body}
+Status:           ✅ DELIVERED
+User ID:          ${userId}
+Title:            ${title}
+Body:             ${body}
+Success Count:    ${data.successCount || 'N/A'}
+Failure Count:    ${data.failureCount || 'N/A'}
+Timestamp:        ${new Date().toLocaleString()}
 ─────────────────────────────────────────────────`;
           console.log(data);
           this.printSuccess(successOutput);
+        } else {
+          // Notification was not delivered
+          const reason = data.reason || 'unknown';
+          const message = data.message || 'Failed to deliver notification';
+          const errorOutput = `
+FCM Notification Delivery Status:
+─────────────────────────────────────────────────
+Status:           ❌ NOT DELIVERED
+User ID:          ${userId}
+Reason:           ${reason}
+Message:          ${message}
+Timestamp:        ${new Date().toLocaleString()}
+─────────────────────────────────────────────────
+User Email:       ${data.userEmail || 'N/A'}
+─────────────────────────────────────────────────`;
+          console.log(data);
+          this.printError(errorOutput);
         }
         this.isLoading = false;
         this.scrollToBottom();

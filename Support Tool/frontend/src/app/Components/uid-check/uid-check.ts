@@ -73,8 +73,16 @@ export class UidCheckComponent {
       this.notificationTitle,
       this.notificationBody
     ).subscribe({
-      next: res => {
-        this.notifyMessage = 'Notification sent successfully';
+      next: (res: any) => {
+        // Check if notification was actually delivered
+        if (res.delivered) {
+          this.notifyMessage = '✅ Notification sent successfully';
+        } else {
+          // Show reason why it wasn't delivered
+          const reason = res.reason || 'unknown';
+          const message = res.message || 'Failed to deliver notification';
+          this.notifyMessage = `❌ Failed: ${message} (${reason})`;
+        }
         console.log(res);
       },
       error: err => {

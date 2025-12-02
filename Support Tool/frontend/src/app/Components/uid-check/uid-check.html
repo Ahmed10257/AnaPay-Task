@@ -115,6 +115,11 @@
               <span class="text-green-600 text-right break-all max-w-xs text-xs">{{ userJson.fcmToken }}</span>
             </div>
 
+            <div *ngIf="userJson.updatedAt" class="flex justify-between items-start bg-blue-50 p-3 rounded-lg border border-blue-200">
+              <span class="font-medium text-blue-700">Last Logged In:</span>
+              <span class="text-blue-600 text-right break-all max-w-xs">{{ userJson.updatedAt | date: 'medium' }}</span>
+            </div>
+
             <div *ngIf="userJson.createdAt" class="flex justify-between items-start bg-gray-50 p-3 rounded-lg">
               <span class="font-medium text-gray-700">Created:</span>
               <span class="text-gray-600 text-right break-all max-w-xs">{{ userJson.createdAt | date: 'short' }}</span>
