@@ -1,12 +1,19 @@
 {
-  "name": "frontend",
-  "version": "0.0.0",
+  "name": "anapay-support-tool",
+  "version": "1.0.0",
+  "description": "AnaPay Support Tool - Desktop Application",
+  "main": "electron/main.js",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:prod": "ng build --configuration production --base-href=./",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "electron": "electron .",
+    "electron:dev": "npm run build -- --base-href=./ && electron .",
+    "electron:build": "npm run build:prod && electron-builder",
+    "electron:dist": "npm run build:prod && electron-builder --publish never"
   },
   "prettier": {
     "printWidth": 100,
@@ -41,6 +48,8 @@
     "@types/jasmine": "~5.1.0",
     "@types/node": "^24.10.1",
     "autoprefixer": "^10.4.22",
+    "electron": "^32.0.0",
+    "electron-builder": "^25.1.8",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
@@ -50,5 +59,58 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
     "typescript": "~5.9.2"
+  },
+  "build": {
+    "appId": "com.anapay.supporttool",
+    "productName": "AnaPay Support Tool",
+    "directories": {
+      "buildResources": "assets/icons"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/main.js",
+      "electron/preload.js",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "certificateFile": null,
+      "certificatePassword": null,
+      "signingHashAlgorithms": [
+        "sha256"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
   }
 }

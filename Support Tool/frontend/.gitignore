@@ -11,6 +11,15 @@
 npm-debug.log
 yarn-error.log
 
+# Electron
+/dist
+/release
+/dist-electron
+*.exe
+*.dmg
+*.AppImage
+*.snap
+
 # IDEs and editors
 .idea/
 .project
