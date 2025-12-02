@@ -115,6 +115,14 @@
               <span class="text-green-600 text-right break-all max-w-xs text-xs">{{ userJson.fcmToken }}</span>
             </div>
 
+            <div *ngIf="!userJson.fcmToken" class="flex justify-between items-start bg-orange-50 p-3 rounded-lg border border-orange-300">
+              <span class="font-medium text-orange-700">FCM Token:</span>
+              <span class="px-3 py-1 rounded-full font-medium text-sm flex items-center gap-2 bg-orange-200 text-orange-800">
+                <lucide-icon name="AlertCircle" class="w-4 h-4"></lucide-icon>
+                Not Available
+              </span>
+            </div>
+
             <div *ngIf="userJson.updatedAt" class="flex justify-between items-start bg-blue-50 p-3 rounded-lg border border-blue-200">
               <span class="font-medium text-blue-700">Last Logged In:</span>
               <span class="text-blue-600 text-right break-all max-w-xs">{{ userJson.updatedAt | date: 'medium' }}</span>

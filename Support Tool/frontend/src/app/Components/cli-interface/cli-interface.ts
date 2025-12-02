@@ -117,6 +117,11 @@ Type 'help' for more information.
           const loginStatus = data.isLoggedIn
             ? '🟢 Logged In'
             : '🔴 Logged Out';
+          const fcmTokenStatus = data.fcmToken ? '✅ Available' : '⚠️ Missing';
+          const fcmTokenInfo = data.fcmToken
+            ? `Token (truncated): ${data.fcmToken.substring(0, 50)}...`
+            : '❌ No FCM token found - User may not have installed app or granted notification permissions';
+          
           const output = `
 User Information:
 ─────────────────────────────────────────────────
@@ -130,14 +135,10 @@ Login Status:         ${loginStatus}
 Created:              ${parseFirestoreDate(data.createdAt)}
 Last Active:          ${parseFirestoreDate(data.updatedAt)}
 ─────────────────────────────────────────────────
-FCM Token:            ${data.fcmToken ? '✓ Present' : '✗ Not found'}
+FCM Token Status:     ${fcmTokenStatus}
 Token Updated:        ${parseFirestoreDate(data.fcmTokenUpdatedAt)}
 ─────────────────────────────────────────────────
-${
-  data.fcmToken
-    ? `Token (truncated): ${data.fcmToken.substring(0, 50)}...`
-    : 'No FCM token available'
-}`;
+${fcmTokenInfo}`;
           this.printSuccess(output);
         }
         this.isLoading = false;
@@ -213,13 +214,23 @@ Timestamp:        ${new Date().toLocaleString()}
           // Notification was not delivered
           const reason = data.reason || 'unknown';
           const message = data.message || 'Failed to deliver notification';
+          let reasonExplanation = '';
+          
+          if (reason === 'no_fcm_token') {
+            reasonExplanation = '\nThe user has not installed the mobile app or has not granted notification permissions.';
+          } else if (reason === 'user_not_logged_in') {
+            reasonExplanation = '\nThe user is currently logged out of the mobile app.';
+          } else if (reason === 'no_tokens') {
+            reasonExplanation = '\nNo FCM tokens found for this user.';
+          }
+          
           const errorOutput = `
 FCM Notification Delivery Status:
 ─────────────────────────────────────────────────
 Status:           ❌ NOT DELIVERED
 User ID:          ${userId}
 Reason:           ${reason}
-Message:          ${message}
+Message:          ${message}${reasonExplanation}
 Timestamp:        ${new Date().toLocaleString()}
 ─────────────────────────────────────────────────
 User Email:       ${data.userEmail || 'N/A'}

@@ -46,15 +46,17 @@ export class NotificationsService {
           title,
           body,
           'failed',
-          'no_tokens',
+          'no_fcm_token',
           userData.email as string,
         );
 
         return {
           success: false,
           delivered: false,
-          reason: 'no_tokens',
-          message: 'No FCM tokens found for user',
+          reason: 'no_fcm_token',
+          message:
+            'User has no FCM token - ensure the app is installed and notification permission is granted',
+          userEmail: userData.email as string,
         };
       }
 

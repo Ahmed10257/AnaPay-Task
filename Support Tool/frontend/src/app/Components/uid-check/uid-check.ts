@@ -81,7 +81,13 @@ export class UidCheckComponent {
           // Show reason why it wasn't delivered
           const reason = res.reason || 'unknown';
           const message = res.message || 'Failed to deliver notification';
-          this.notifyMessage = `❌ Failed: ${message} (${reason})`;
+          if (reason === 'no_fcm_token') {
+            this.notifyMessage = `⚠️ FCM Token Missing: User has not installed the app or denied notification permissions`;
+          } else if (reason === 'user_not_logged_in') {
+            this.notifyMessage = `❌ User Offline: ${message}`;
+          } else {
+            this.notifyMessage = `❌ Failed: ${message} (${reason})`;
+          }
         }
         console.log(res);
       },
